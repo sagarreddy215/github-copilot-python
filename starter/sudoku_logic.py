@@ -55,6 +55,35 @@ def count_solutions(board, limit=2):
                 return total
     return 1
 
+
+def has_unique_solution(board):
+    """Return True when the supplied board has exactly one valid completion."""
+    board = deep_copy(board)
+    solution_count = 0
+
+    def backtrack():
+        nonlocal solution_count
+        if solution_count > 1:
+            return
+
+        for row in range(SIZE):
+            for col in range(SIZE):
+                if board[row][col] == EMPTY:
+                    for candidate in range(1, SIZE + 1):
+                        if is_safe(board, row, col, candidate):
+                            board[row][col] = candidate
+                            backtrack()
+                            board[row][col] = EMPTY
+                            if solution_count > 1:
+                                return
+                    return
+
+        solution_count += 1
+
+    backtrack()
+    return solution_count == 1
+
+
 def remove_cells(board, clues):
     cells = [(row, col) for row in range(SIZE) for col in range(SIZE)]
     random.shuffle(cells)

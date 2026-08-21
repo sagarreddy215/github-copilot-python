@@ -1,39 +1,41 @@
+# starter/app.py
 from flask import Flask, render_template, jsonify, request
-import sudoku_logic
+from services.puzzle_service import generate_sudoku_board
 
 app = Flask(__name__)
 
-# Keep a simple in-memory store for current puzzle and solution
-CURRENT = {
-    'puzzle': None,
-    'solution': None
-}
-
-@app.route('/')
+@app.route("/")
 def index():
-    return render_template('index.html')
+    return render_template("index.html")
 
-@app.route('/new')
-def new_game():
-    clues = int(request.args.get('clues', 35))
-    puzzle, solution = sudoku_logic.generate_puzzle(clues)
-    CURRENT['puzzle'] = puzzle
-    CURRENT['solution'] = solution
-    return jsonify({'puzzle': puzzle})
+@app.route("/api/new-game/<difficulty>", methods=["GET"])
+def new_game(difficulty):
+    try:
+        board = generate_sudoku_board(difficulty)
+        return jsonify({"status": "success", "board": board})
+    except ValueError as err:
+        return jsonify({"error": str(err)}), 400
+    except Exception as err:
+        return jsonify({"error": f"Server processing error: {str(err)}"}), 500
 
-@app.route('/check', methods=['POST'])
-def check_solution():
-    data = request.json
-    board = data.get('board')
-    solution = CURRENT.get('solution')
-    if solution is None:
-        return jsonify({'error': 'No game in progress'}), 400
-    incorrect = []
-    for i in range(sudoku_logic.SIZE):
-        for j in range(sudoku_logic.SIZE):
-            if board[i][j] != solution[i][j]:
-                incorrect.append([i, j])
-    return jsonify({'incorrect': incorrect})
+@app.route("/api/hint", methods=["POST"])
+def get_hint():
+    try:
+        data = request.get_json()
+        if not data or "current_board" not in data or "solution" not in data:
+            return jsonify({"error": "Missing current_board or solution payload"}), 400
 
-if __name__ == '__main__':
+        current_board = data["current_board"]
+        solution = data["solution"]
+
+        for r in range(9):
+            for c in range(9):
+                if current_board[r][c] == 0 or current_board[r][c] == "":
+                    return jsonify({"row": r, "col": c, "value": solution[r][c]})
+
+        return jsonify({"message": "No empty cells remaining"}), 400
+    except Exception as err:
+        return jsonify({"error": f"Hint processing failed: {str(err)}"}), 500
+
+if __name__ == "__main__":
     app.run(debug=True)
