@@ -1,23 +1,79 @@
 :root {
-  --box-plain-bg: #ffffff;
-  --box-shade-bg: #e9ecef; /* Shaded background for alternating sub-grids */
-  --border-color: #333333;
+  --box-plain-bg: #fffdf7;
+  --box-shade-bg: #cbdceb;
+  --border-color: #27313a;
+  --page-bg: #f5f7fa;
+  --text-color: #17202a;
 }
 
 body.dark-mode {
   --box-plain-bg: #1a202c;
-  --box-shade-bg: #2d3748;
+  --box-shade-bg: #34495e;
   --border-color: #cbd5e0;
+  --page-bg: #111827;
+  --text-color: #f3f4f6;
 }
+
+body {
+  background: var(--page-bg);
+  color: var(--text-color);
+  margin: 0;
+  min-height: 100vh;
+}
+
+.game-shell {
+  margin: 0 auto;
+  max-width: 44rem;
+  padding: 2rem 1rem;
+}
+
+.game-header,
+.toolbar,
+.stats {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+}
+
+.toolbar { flex-wrap: wrap; justify-content: flex-start; }
+.stats { justify-content: flex-end; }
+.stats div { display: grid; gap: 0.2rem; }
+button, select { font: inherit; padding: 0.45rem 0.7rem; }
 
 .cell {
   border: 1px solid var(--border-color);
+  box-sizing: border-box;
+  font-size: 1.35rem;
+  height: 3rem;
+  text-align: center;
+  width: 3rem;
 }
 
-.box-plain {
-  background-color: var(--box-plain-bg) !important;
+#sudoku-board {
+  display: grid;
+  grid-template-columns: repeat(9, 3rem);
+  margin: 1.5rem 0;
+  max-width: 100%;
 }
 
-.box-shade {
-  background-color: var(--box-shade-bg) !important;
+.cell:nth-child(3n) { border-right-width: 3px; }
+.cell:nth-child(n+19):nth-child(-n+27),
+.cell:nth-child(n+46):nth-child(-n+54) { border-bottom-width: 3px; }
+.box-plain { background-color: var(--box-plain-bg) !important; }
+.box-shade { background-color: var(--box-shade-bg) !important; }
+.given { font-weight: bold; }
+.hint { color: #176b3a; }
+.incorrect { background-color: #ffd9d9 !important; color: #9b1c1c; }
+.message { min-height: 1.5rem; }
+.error { color: #9b1c1c; }
+body.dark-mode .cell { color: var(--text-color); }
+body.dark-mode .hint { color: #8ee0ad; }
+body.dark-mode .incorrect { background-color: #632b2b !important; color: #ffd9d9; }
+
+@media (max-width: 32rem) {
+  .game-header { align-items: flex-start; flex-wrap: wrap; }
+  .stats { margin-left: auto; }
+  .cell { font-size: 1rem; height: 10vw; width: 10vw; }
+  #sudoku-board { grid-template-columns: repeat(9, 10vw); }
 }
